@@ -84,7 +84,7 @@ class Display
   end
 
   def draw_board
-    system("clear")
+    # system("clear")
     render
   end
 
