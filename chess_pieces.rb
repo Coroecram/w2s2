@@ -1,4 +1,6 @@
-class ChessPiece
+require 'byebug'
+
+class EmptySpace
   attr_accessor :position, :board
 
   def initialize(board, position)
@@ -10,15 +12,31 @@ class ChessPiece
     "8 "
   end
 
+end
+
+class ChessPiece < EmptySpace
+  attr_accessor :team
+
+  def initialize(board, position, team)
+    super(board, position)
+    @team = team
+  end
+
   def make_move(end_pos)
+    # byebug
     if valid_move?(end_pos)
       if board[end_pos].is_a?(EmptySpace)
-        board[position], board[end_pos] = board[end_pos], board[position]
+        start_object = self.board[position]
+        end_object = self.board[end_pos]
+        self.board[position] = end_object
+        self.board[end_pos] = start_object
+        p self.board.grid.first
       else
-        board[end_pos] = board[position]
-        board[position] = EmptySpace.new(board, end_pos)
+        start_object = self.board[position]
+        end_object = EmptySpace.new(board, end_pos)
+        self.board[position] = end_object
+        self.board[end_pos] = start_object
       end
-        self.position, board[end_pos].position = board[end_pos].position, self.position
     end
   end
 
@@ -26,12 +44,8 @@ class ChessPiece
     true
   end
 
-end
-
-class EmptySpace < ChessPiece
-
-  def to_s
-    "|_"
+  def enemy?(other_piece)
+    team != other_piece.team
   end
 
 end
@@ -74,10 +88,7 @@ class Queen < ChessPiece
     "Q "
   end
 
-  # def make_move(end_pos)
-  #   # if valid_move?(move)
-  # end
-  #
+
   # def valid_move?(pos)
   #
   # end

@@ -66,6 +66,7 @@ class Display
     when "\r"
       if selected_position
         board.make_move(selected_position, cursor_position)
+        self.selected_position = nil
       else
         #if board has valid piece at pos
         self.selected_position = cursor_position
@@ -84,7 +85,7 @@ class Display
   end
 
   def draw_board
-    # system("clear")
+    system("clear")
     render
   end
 
