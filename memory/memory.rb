@@ -1,5 +1,5 @@
 require_relative "board"
-require_relative "player"
+load "./player.rb"
 
 class MemoryGame
   attr_reader :player
@@ -27,18 +27,22 @@ class MemoryGame
   end
 
   def get_player_input
-    pos = nil
-
-    until pos && valid_pos?(pos)
+    # pos = nil
+    # until pos && valid_pos?(pos)
+    begin
       pos = player.get_input
+    rescue InputError => e
+      puts e.message
+      retry
     end
+    # end
 
     pos
   end
 
   def make_guess(pos)
     revealed_value = board.reveal(pos)
-    player.receive_revealed_card(pos, revealed_value) 
+    player.receive_revealed_card(pos, revealed_value)
     board.render
 
     compare_guess(pos)
