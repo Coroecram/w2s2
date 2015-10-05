@@ -4,7 +4,7 @@ class Board
   attr_accessor :grid
 
   def initialize
-    @grid = Array.new(8) { |row| Array.new(8) { |col| ChessPiece.new(self, [row, col]) } }
+    @grid = Array.new(8) { |row| Array.new(8) { |col| EmptySpace.new(self, [row, col]) } }
 
     self[[3,3]] = Queen.new(self, [3,3])
   end
@@ -31,7 +31,6 @@ class Board
 
   def make_move(start_pos, end_pos)
     piece = self[start_pos]
-    puts piece
     piece.make_move(end_pos)
   end
 

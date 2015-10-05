@@ -1,5 +1,5 @@
 class ChessPiece
-  attr_accessor :position
+  attr_accessor :position, :board
 
   def initialize(board, position)
     @position = position
@@ -74,13 +74,13 @@ class Queen < ChessPiece
     "Q "
   end
 
-  def make_move(end_pos)
-    # if valid_move?(move)
-  end
-
-  def valid_move?(pos)
-
-  end
+  # def make_move(end_pos)
+  #   # if valid_move?(move)
+  # end
+  #
+  # def valid_move?(pos)
+  #
+  # end
 
 end
 
