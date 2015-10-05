@@ -1,4 +1,5 @@
 require 'colorize'
+require 'io/console'
 
 class ChessPiece
   attr_reader :position
@@ -14,6 +15,9 @@ class ChessPiece
 
 end
 
+class Pawn < ChessPiece
+end
+
 class Board
   attr_reader :grid
 
@@ -24,6 +28,7 @@ class Board
 end
 
 class Display
+  attr_reader :board
   attr_accessor :cursor_position, :selected_position
 
   def initialize(board)
@@ -53,7 +58,10 @@ class Display
   end
 
   def start_game
+    draw_board
     while true
+      draw_board
+      puts selected_position
       input = read_char
       handle_input(input)
     end
@@ -68,34 +76,24 @@ class Display
       input << STDIN.read_nonblock(3) rescue nil
       input << STDIN.read_nonblock(2) rescue nil
     end
-  ensure
-    STDIN.echo = true
-    STDIN.cooked!
+    ensure
+      STDIN.echo = true
+      STDIN.cooked!
 
-    return input
+      return input
   end
 
   def handle_input(input)
 
     case input
 
-    # when "\r"
-    #   puts "RETURN"
-    # when "\e"
-    #   puts "ESCAPE"
-    # when "\e[A"
-    #   puts "UP ARROW"
-    # when "\e[B"
-    #   puts "DOWN ARROW"
-    # when "\e[C"
-    #   puts "RIGHT ARROW"
-    # when "\e[D"
-    #   puts "LEFT ARROW"
     when "\r"
       if selected_position
-        board.make_move(selected_position, current_position)
+        board.make_move(selected_position, cursor_position)
       else
-        selected_position = current_position
+        #if board has valid piece at pos
+        self.selected_position = cursor_position
+      end
     when "\e"
       abort
     when "\e[A"
@@ -106,5 +104,19 @@ class Display
       move_cursor(:right)
     when "\e[D"
       move_cursor(:left)
+    end
+  end
 
+  def draw_board
+    system("clear")
+    render
+  end
+
+end
+
+
+if $PROGRAM_NAME == __FILE__
+  b = Board.new
+  d = Display.new(b)
+  d.start_game
 end
