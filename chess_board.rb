@@ -6,7 +6,8 @@ class Board
   def initialize
     @grid = Array.new(8) { |row| Array.new(8) { |col| EmptySpace.new(self, [row, col]) } }
 
-    self[[7,3]] = Queen.new(self, [3,3], :white)
+    self[[7,1]] = Knight.new(self, [7,1], :white)
+    self[[7,4]] = King.new(self, [7,4], :white)
   end
 
   def flip
@@ -39,6 +40,13 @@ class Board
     @grid.each do |row|
       p row
     end
+  end
+
+  def in_bounds?(pos)
+    x, y = pos
+    return false if x > grid.length - 1 || x < 0
+    return false if y > grid.length - 1 || y < 0
+    true
   end
 
 end

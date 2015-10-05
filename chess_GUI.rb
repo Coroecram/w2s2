@@ -30,7 +30,8 @@ class Display
     moves = {up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1]}
     x, y = cursor_position
     dx, dy = moves[direction]
-    self.cursor_position = [(x + dx) , (y + dy)]
+    new_pos = [(x + dx) , (y + dy)]
+    self.cursor_position = new_pos if board.in_bounds?(new_pos)
   end
 
   def start_game

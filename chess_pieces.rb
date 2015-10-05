@@ -2,10 +2,12 @@ require 'byebug'
 
 class EmptySpace
   attr_accessor :position, :board
+  attr_reader :team
 
   def initialize(board, position)
     @position = position
     @board = board
+    @team = nil
   end
 
   def to_s
@@ -15,7 +17,7 @@ class EmptySpace
 end
 
 class ChessPiece < EmptySpace
-  attr_accessor :team
+  attr_accessor
 
   def initialize(board, position, team)
     super(board, position)
@@ -30,7 +32,6 @@ class ChessPiece < EmptySpace
         end_object = self.board[end_pos]
         self.board[position] = end_object
         self.board[end_pos] = start_object
-        p self.board.grid.first
       else
         start_object = self.board[position]
         end_object = EmptySpace.new(board, end_pos)
@@ -41,11 +42,15 @@ class ChessPiece < EmptySpace
   end
 
   def valid_move?(end_pos)
-    true
+    valid_moves.include?(end_pos)
   end
 
   def enemy?(other_piece)
     team != other_piece.team
+  end
+
+  def friendly?(other_piece)
+    team == other_piece.team
   end
 
 end
@@ -76,8 +81,29 @@ end
 
 class Knight < ChessPiece
 
+  DIRECTIONS = [[2, 1],
+                [1, 2],
+                [2, 1],
+                [-2, -1],
+                [-1, -2],
+                [-1, 2],
+                [-2, 1],
+                [1, -2],
+                [1, -2]
+                ]
+
   def to_s
-    "K "
+    "N "
+  end
+
+  def valid_moves
+    possible_moves = []
+    DIRECTIONS.each do |dir|
+      x, y = position
+      dx, dy = dir
+      possible_moves << [x + dx, y + dy]
+    end
+    possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
   end
 
 end
@@ -88,17 +114,32 @@ class Queen < ChessPiece
     "Q "
   end
 
-
-  # def valid_move?(pos)
-  #
-  # end
-
 end
 
 class King < ChessPiece
 
+DIRECTIONS = [[1, 0],
+              [0, 1],
+              [1, 1],
+              [0, -1],
+              [-1, 0],
+              [-1,-1],
+              [1, -1],
+              [-1, 1]
+              ]
+
   def to_s
     "K "
+  end
+
+  def valid_moves
+    possible_moves = []
+    DIRECTIONS.each do |dir|
+      x, y = position
+      dx, dy = dir
+      possible_moves << [x + dx, y + dy]
+    end
+    possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
   end
 
 end
