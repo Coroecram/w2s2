@@ -23,6 +23,10 @@ class EmptySpace
     nil
   end
 
+  def empty?
+    team == nil
+  end
+
 end
 
 class ChessPiece < EmptySpace
@@ -35,7 +39,7 @@ class ChessPiece < EmptySpace
 
   def make_move(end_pos)
     if valid_move?(end_pos)
-      self. first_move = nil if self.is_a?(Pawn)
+      self.first_move = nil if self.is_a?(Pawn)
 
       if enemy?(board[end_pos])
         start_object = self.board[position]
@@ -82,11 +86,12 @@ class Pawn < ChessPiece
   end
 
   def valid_moves
-    directions = [[-1, 0]]
+    x, y = position
+    directions = []
+    directions << [-1, 0] if board[[x - 1, y]].team.nil?
     directions << [-2, 0] if first_move
     possible_moves = []
     OFFENSIVE_MOVES.each do |move|
-      x, y = position
       dx, dy = move
       directions << move if enemy?(board[[x + dx, y + dy]])
     end
@@ -102,23 +107,51 @@ end
 
 class SlidingPiece < ChessPiece
   def valid_moves
-    queue = []
-    directions.each do |dir|
+    all_valid_moves = []
+    self.directions.each do |dir|
+      queue = [position]
+      until queue.empty?
+        current_position = queue.shift
+        x, y = current_position
+        dx, dy = dir
+        destination_pos = [x + dx, y + dy]
+        if board.in_bounds?(destination_pos)
+          destination_tile = board[destination_pos]
+          if destination_tile.empty?
+            queue << destination_pos #add  destination to queue
+            all_valid_moves << destination_pos #add to valid moves
+          elsif enemy?(destination_tile)
+            all_valid_moves << destination_pos
+          end
+        end
+      end
     end
-    possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
+    all_valid_moves
   end
 
+  def self.horizontal_directions
+    [[0, 1],
+     [0, -1],
+     [1, 0],
+    [-1, 0]]
+  end
+
+  def self.diagonal_directions
+    [[1, 1],
+     [-1, -1],
+     [1, -1],
+    [-1, 1]]
+  end
 end
 
 class Rook < SlidingPiece
 
-  DIRECTIONS = [[0, 1],
-                [0, -1],
-                [1, 0],
-                [-1, 0]]
-
   def to_s
     team == :white ? "\u2656" + " " : "\u265C" + " "
+  end
+
+  def directions
+    SlidingPiece.horizontal_directions
   end
 
 
@@ -127,6 +160,8 @@ end
 
 class Bishop < SlidingPiece
 
+  DIRECTIONS = SlidingPiece.diagonal_directions
+
   def to_s
     team == :white ? "\u2657" + " " : "\u265D" + " "
   end
@@ -134,6 +169,9 @@ class Bishop < SlidingPiece
 end
 
 class Queen < SlidingPiece
+
+  DIRECTIONS = SlidingPiece.horizontal_directions +
+               SlidingPiece.diagonal_directions
 
   def to_s
     team == :white ? "\u2655" + " " : "\u265B" + " "
@@ -172,15 +210,15 @@ class Knight < SteppingPiece
     team == :white ? "\u2658" + " " : "\u265E" + " "
   end
 
-  def valid_moves
-    possible_moves = []
-    DIRECTIONS.each do |dir|
-      x, y = position
-      dx, dy = dir
-      possible_moves << [x + dx, y + dy]
-    end
-    possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
-  end
+  # def valid_moves
+  #   possible_moves = []
+  #   DIRECTIONS.each do |dir|
+  #     x, y = position
+  #     dx, dy = dir
+  #     possible_moves << [x + dx, y + dy]
+  #   end
+  #   possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
+  # end
 
 end
 

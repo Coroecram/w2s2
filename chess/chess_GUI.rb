@@ -58,6 +58,8 @@ class Display
   end
 
   def swap_players
+    draw_board
+    sleep 0.7
     board.flip
     current_team == :white ? self.current_team = :black : self.current_team = :white
   end

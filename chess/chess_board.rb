@@ -20,18 +20,22 @@ class Board
     self[[7,6]] = Knight.new(self, [7,6], color)
     self[[7,3]] = Queen.new(self, [7,3], color)
     self[[7,4]] = King.new(self, [7,4], color)
-    grid.length.times do |idx|
-      self[[6,idx]] = Pawn.new(self, [6,idx], color)
-    end
+    #grid.length.times do |idx|
+    #  self[[6,idx]] = Pawn.new(self, [6,idx], color)
+    #end
   end
 
   def flip
-    grid_copy = self.grid.map {|col| col.dup}.dup
+    grid_copy = clone
     self.grid.length.times do |idx|
       self.grid.length.times do |idy|
         self[[(idy - 7).abs,(idx - 7).abs]] = grid_copy[idy][idx]
       end
     end
+  end
+
+  def clone
+    self.grid.map {|col| col.dup}.dup
   end
 
   def [](pos)
@@ -43,6 +47,11 @@ class Board
     x, y = pos
     @grid[x][y] = val
     @grid[x][y].position = pos
+  end
+
+  def empty?(pos)
+    x, y = pos
+    self[pos].is_a?(EmptySpace)
   end
 
   def make_move(start_pos, end_pos)
