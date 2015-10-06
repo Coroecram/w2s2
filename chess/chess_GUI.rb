@@ -5,22 +5,36 @@ load './chess_board.rb'
 
 class Display
   attr_reader :board
-  attr_accessor :cursor_position, :selected_position
+  attr_accessor :cursor_position, :selected_position, :current_team
 
   def initialize(board)
     @selected_position = nil
     @board = board
     @cursor_position = [5, 4]
+    @current_team = :white
   end
 
   def render
     @board.grid.each do |row|
+      print " ".colorize(:background => :light_white)
       row.each do |col|
         if col.position == cursor_position
-          print col.to_s.colorize(:red)
+          print col.to_s.colorize(:background => :light_white, :color => :red)
+        elsif col.position == selected_position
+          print col.to_s.colorize(:background => :light_white, :color => :blue)
         else
-          print col
+          print col.to_s.colorize(:background => :light_white)
         end
+      end
+      puts
+    end
+  end
+
+  def inspecting_render
+    @board.grid.each do |row|
+      print " ".colorize(:background => :light_white)
+      row.each do |col|
+        puts "#{col.team}, #{col.position}"
       end
       puts
     end
@@ -37,11 +51,15 @@ class Display
   def start_game
     draw_board
     while true
-      draw_board
-      puts selected_position
-      input = read_char
-      handle_input(input)
+     draw_board
+     input = read_char
+     handle_input(input)
     end
+  end
+
+  def swap_players
+    board.flip
+    current_team == :white ? self.current_team = :black : self.current_team = :white
   end
 
   def read_char
@@ -66,11 +84,12 @@ class Display
 
     when "\r"
       if selected_position
-        board.make_move(selected_position, cursor_position)
+        swap_players if board.make_move(selected_position, cursor_position)
         self.selected_position = nil
       else
-        #if board has valid piece at pos
-        self.selected_position = cursor_position
+        if board[cursor_position].team == current_team
+          self.selected_position = cursor_position
+        end
       end
     when "\e"
       abort

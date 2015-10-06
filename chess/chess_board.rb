@@ -5,17 +5,31 @@ class Board
 
   def initialize
     @grid = Array.new(8) { |row| Array.new(8) { |col| EmptySpace.new(self, [row, col]) } }
+    populate_board(:white)
+    flip
+    populate_board(:black)
+    flip
+  end
 
-    self[[7,1]] = Knight.new(self, [7,1], :white)
-    self[[7,4]] = King.new(self, [7,4], :white)
+  def populate_board(color)
+    self[[7,0]] = Rook.new(self, [7,0], color)
+    self[[7,7]] = Rook.new(self, [7,7], color)
+    self[[7,2]] = Bishop.new(self, [7,2], color)
+    self[[7,5]] = Bishop.new(self, [7,5], color)
+    self[[7,1]] = Knight.new(self, [7,1], color)
+    self[[7,6]] = Knight.new(self, [7,6], color)
+    self[[7,3]] = Queen.new(self, [7,3], color)
+    self[[7,4]] = King.new(self, [7,4], color)
+    grid.length.times do |idx|
+      self[[6,idx]] = Pawn.new(self, [6,idx], color)
+    end
   end
 
   def flip
-    self.grid = grid.transpose.map(&:reverse).reverse
-    grid.each_index do |idx|
-      grid.each_index do |idy|
-        pos = [idx, idy]
-        self[pos].position = [idx, idy]
+    grid_copy = self.grid.map {|col| col.dup}.dup
+    self.grid.length.times do |idx|
+      self.grid.length.times do |idy|
+        self[[(idy - 7).abs,(idx - 7).abs]] = grid_copy[idy][idx]
       end
     end
   end

@@ -1,4 +1,5 @@
 require 'byebug'
+require 'colorize'
 
 class EmptySpace
   attr_accessor :position, :board
@@ -11,7 +12,15 @@ class EmptySpace
   end
 
   def to_s
-    "8 "
+    "+ "
+  end
+
+  def enemy?(other_piece)
+    nil
+  end
+
+  def friendly?(other_piece)
+    nil
   end
 
 end
@@ -25,20 +34,23 @@ class ChessPiece < EmptySpace
   end
 
   def make_move(end_pos)
-    # byebug
     if valid_move?(end_pos)
-      if board[end_pos].is_a?(EmptySpace)
+      self. first_move = nil if self.is_a?(Pawn)
+
+      if enemy?(board[end_pos])
+        start_object = self.board[position]
+        self.board[position] = EmptySpace.new(board, end_pos)
+        self.board[end_pos] = start_object
+        return true
+      else
         start_object = self.board[position]
         end_object = self.board[end_pos]
         self.board[position] = end_object
         self.board[end_pos] = start_object
-      else
-        start_object = self.board[position]
-        end_object = EmptySpace.new(board, end_pos)
-        self.board[position] = end_object
-        self.board[end_pos] = start_object
+        return true
       end
     end
+    false
   end
 
   def valid_move?(end_pos)
@@ -46,7 +58,7 @@ class ChessPiece < EmptySpace
   end
 
   def enemy?(other_piece)
-    team != other_piece.team
+    other_piece.team != nil && team != other_piece.team
   end
 
   def friendly?(other_piece)
@@ -56,9 +68,34 @@ class ChessPiece < EmptySpace
 end
 
 class Pawn < ChessPiece
+  attr_accessor :first_move
+  OFFENSIVE_MOVES = [[-1, 1],
+                      [-1, -1]]
+
+  def initialize(board, position, team)
+    super
+    @first_move = true
+  end
 
   def to_s
-    "P "
+    team == :white ? "\u2659" + " " : "\u265F" + " "
+  end
+
+  def valid_moves
+    directions = [[-1, 0]]
+    directions << [-2, 0] if first_move
+    possible_moves = []
+    OFFENSIVE_MOVES.each do |move|
+      x, y = position
+      dx, dy = move
+      directions << move if enemy?(board[[x + dx, y + dy]])
+    end
+    directions.each do |dir|
+      x, y = position
+      dx, dy = dir
+      possible_moves << [x + dx, y + dy]
+    end
+    possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
   end
 
 end
@@ -66,7 +103,7 @@ end
 class Rook < ChessPiece
 
   def to_s
-    "R "
+    team == :white ? "\u2656" + " " : "\u265C" + " "
   end
 
 end
@@ -74,7 +111,15 @@ end
 class Bishop < ChessPiece
 
   def to_s
-    "B "
+    team == :white ? "\u2657" + " " : "\u265D" + " "
+  end
+
+end
+
+class Queen < ChessPiece
+
+  def to_s
+    team == :white ? "\u2655" + " " : "\u265B" + " "
   end
 
 end
@@ -93,7 +138,7 @@ class Knight < ChessPiece
                 ]
 
   def to_s
-    "N "
+    team == :white ? "\u2658" + " " : "\u265E" + " "
   end
 
   def valid_moves
@@ -104,14 +149,6 @@ class Knight < ChessPiece
       possible_moves << [x + dx, y + dy]
     end
     possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
-  end
-
-end
-
-class Queen < ChessPiece
-
-  def to_s
-    "Q "
   end
 
 end
@@ -129,7 +166,7 @@ DIRECTIONS = [[1, 0],
               ]
 
   def to_s
-    "K "
+    team == :white ? "\u2654" + " " : "\u265A" + " "
   end
 
   def valid_moves
