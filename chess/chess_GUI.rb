@@ -59,11 +59,20 @@ class Display
      input = read_char
      handle_input(input)
     end
+    if board.in_check?(current_team)
+      puts "Checkmate, #{other_team.to_s.capitalize} wins!"
+    else
+      puts "The game is a draw."
+    end
   end
 
   def swap_players
     draw_board
     board.flip
+    current_team == :white ? self.current_team = :black : self.current_team = :white
+  end
+
+  def other_team
     current_team == :white ? self.current_team = :black : self.current_team = :white
   end
 

@@ -114,7 +114,7 @@ class Pawn < ChessPiece
     x, y = position
     directions = []
     directions << [-1, 0] if board[[x - 1, y]].team.nil?
-    directions << [-2, 0] if first_move
+    directions << [-2, 0] if first_move && board[[x - 2, y]].team.nil?
     possible_moves = []
     [[-1, 1], [-1, -1]].each do |move|
       dx, dy = move

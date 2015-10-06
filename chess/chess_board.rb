@@ -9,6 +9,8 @@ class Board
     flip
     populate_board(:black)
     flip
+    self[[7,3]] = Queen.new(self, [7,3], :white)
+    self[[7,4]] = King.new(self, [7,4], :white)
   end
 
   def populate_board(color)
@@ -18,8 +20,8 @@ class Board
     self[[7,5]] = Bishop.new(self, [7,5], color)
     self[[7,1]] = Knight.new(self, [7,1], color)
     self[[7,6]] = Knight.new(self, [7,6], color)
-    self[[7,3]] = Queen.new(self, [7,3], color)
-    self[[7,4]] = King.new(self, [7,4], color)
+    self[[7,4]] = Queen.new(self, [7,3], color)
+    self[[7,3]] = King.new(self, [7,4], color)
     grid.length.times do |idx|
      self[[6,idx]] = Pawn.new(self, [6,idx], color)
     end
