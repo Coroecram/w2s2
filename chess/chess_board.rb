@@ -16,14 +16,14 @@ class Board
   def populate_board(color)
     self[[7,0]] = Rook.new(self, [7,0], color)
     self[[7,7]] = Rook.new(self, [7,7], color)
-    self[[7,2]] = Bishop.new(self, [7,2], color)
+     self[[7,2]] = Bishop.new(self, [7,2], color)
     self[[7,5]] = Bishop.new(self, [7,5], color)
     self[[7,1]] = Knight.new(self, [7,1], color)
     self[[7,6]] = Knight.new(self, [7,6], color)
     self[[7,4]] = Queen.new(self, [7,3], color)
     self[[7,3]] = King.new(self, [7,4], color)
     grid.length.times do |idx|
-     self[[6,idx]] = Pawn.new(self, [6,idx], color)
+    self[[6,idx]] = Pawn.new(self, [6,idx], color)
     end
   end
 

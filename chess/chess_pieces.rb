@@ -43,20 +43,11 @@ class ChessPiece < EmptySpace
 
   def make_move(end_pos)
     if valid_move?(end_pos)
-      # board_clone = board.clone
-      # board_clone.move(position, end_pos)
-      # board_clone.flip
-      # unless board_clone.in_check?(team)
-      self.first_move = nil if self.is_a?(Pawn)
       implement_move(end_pos)
       return true
     end
     false
   end
-
-  # def valid_move?(end_pos)
-  #   valid_moves.include?(end_pos)
-  # end
 
   def has_valid_moves?
     valid_moves.any? { |move| valid_move?(move) }
@@ -110,11 +101,30 @@ class Pawn < ChessPiece
     " " + (team == :white ? "\u2659" : "\u265F") + " "
   end
 
+  def make_move(end_pos)
+    start_pos = position
+    if valid_move?(end_pos)
+      self.first_move = nil
+      implement_move(end_pos)
+      promote_if_needed(end_pos)
+      return true
+    end
+    false
+  end
+
+  def promote_if_needed(end_pos)
+    if end_pos.first == 0
+      self.board[end_pos] = Queen.new(board, end_pos, team)
+    end
+  end
+
   def valid_moves
     x, y = position
     directions = []
     directions << [-1, 0] if board[[x - 1, y]].team.nil?
-    directions << [-2, 0] if first_move && board[[x - 2, y]].team.nil?
+    directions << [-2, 0] if first_move &&
+                             board[[x - 2, y]].team.nil? &&
+                             board[[x - 1, y]].team.nil?
     possible_moves = []
     [[-1, 1], [-1, -1]].each do |move|
       dx, dy = move
@@ -183,6 +193,13 @@ end
 
 class Rook < SlidingPiece
 
+  attr_accessor :first_move
+
+  def initialize(board, position, team)
+    super
+    @first_move = true
+  end
+
   def to_s
     " " + (team == :white ? "\u2656" : "\u265C") + " "
   end
@@ -191,7 +208,10 @@ class Rook < SlidingPiece
     SlidingPiece.horizontal_directions
   end
 
-
+  def make_move(end_pos)
+    @first_move = false
+    super
+  end
 
 end
 
@@ -259,6 +279,13 @@ end
 
 class King < SteppingPiece
 
+  attr_accessor :first_move
+
+  def initialize(board, position, team)
+    super
+    @first_move = true
+  end
+
   def to_s
     " " + (team == :white ? "\u2654" : "\u265A") + " "
   end
@@ -273,5 +300,67 @@ class King < SteppingPiece
     [1, -1],
     [-1, 1]]
   end
+
+  def make_move(end_pos)
+    if valid_move?(end_pos)
+      implement_move(end_pos)
+      @first_move = false
+      return true
+    end
+    false
+  end
+
+  def valid_move?(end_pos)
+    if first_move
+      made_move = castling?(end_pos)
+      return true if made_move
+    end
+    return false unless valid_moves.include?(end_pos)
+    board_clone = board.clone
+    board_clone.move(position, end_pos)
+    board_clone.flip
+    return false if board_clone.in_check?(team)
+    true
+  end
+
+  def castling?(end_pos)
+    if end_pos == [7, 1] || end_pos == [7,6]
+      if end_pos == [7,1] && board[[7,0]].class == Rook && board[[7,0]].first_move
+        castle("left")
+      elsif end_pos == [7,6] && board[[7,7]].class == Rook && board[[7,7]].first_move
+        castle("right")
+      end
+    end
+  end
+
+    def castle(direction)
+      if direction == "left"
+        end_pos = [7,1]
+        if board[[7,1]].class == EmptySpace && board[[7,2]].class == EmptySpace
+
+          board_clone = board.clone
+          board_clone.move(position, end_pos)
+          board_clone.move([7,0], [7,2])
+          board_clone.flip
+          return false if board_clone.in_check?(team)
+
+          board[[7,0]].make_move([7,2])
+          implement_move(end_pos)
+        end
+      else
+        end_pos = [7,6]
+        if board[[7,6]].class == EmptySpace && board[[7,5]].class == EmptySpace
+
+          board_clone = board.clone
+          board_clone.move(position, end_pos)
+          board_clone.move([7,7], [7,5])
+          board_clone.flip
+          return false if board_clone.in_check?(team)
+
+          board[[7,7]].make_move([7,5])
+          implement_move(end_pos)
+        end
+      end
+    end
 
 end

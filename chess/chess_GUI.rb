@@ -7,12 +7,20 @@ class Display
   attr_reader :board
   attr_accessor :cursor_position, :selected_position, :current_team, :flipped
 
-  def initialize(board)
+  def initialize(board, flipped = false)
     @selected_position = nil
     @board = board
     @cursor_position = [5, 4]
     @current_team = :white
-    @flipped = false
+    @flipped = flipped
+  end
+
+  def get_flipping_pref
+    puts "Graphically flip the board every turn?"
+    input = gets.chomp.downcase
+    if input == "y"
+      self.flipped = nil
+    end
   end
 
   def render
@@ -57,6 +65,7 @@ class Display
 
   def start_game
     draw_board
+    #get_flipping_pref
     while board.any_available_moves?(current_team)
      draw_board
      input = read_char
@@ -130,6 +139,7 @@ class Display
 
   def draw_board
     system("clear")
+    puts (' ' * 6) + "#{current_team.to_s.capitalize}'s Turn"
     render
   end
 
@@ -138,6 +148,11 @@ end
 
 if $PROGRAM_NAME == __FILE__
   b = Board.new
+  # if ARGV.empty?
+  #   d = Display.new(b)
+  # else
+  #   d = Display.new(b, nil)
+  # end
   d = Display.new(b)
   d.start_game
 end
