@@ -15,15 +15,19 @@ class Display
   end
 
   def render
+    background_color = nil
     @board.grid.each do |row|
-      print " ".colorize(:background => :light_white)
+      # print " ".colorize(:background => background_color)
+      background_color = (background_color.nil? ? :light_black : nil)
       row.each do |col|
+        background_color = (background_color.nil? ? :light_black : nil)
         if col.position == cursor_position
-          print col.to_s.colorize(:background => :light_white, :color => :red)
+
+          print col.to_s.colorize(:background => :light_blue)
         elsif col.position == selected_position
-          print col.to_s.colorize(:background => :light_white, :color => :blue)
+          print col.to_s.colorize(:background => :red)
         else
-          print col.to_s.colorize(:background => :light_white)
+          print col.to_s.colorize(:background => background_color)
         end
       end
       puts
@@ -50,7 +54,7 @@ class Display
 
   def start_game
     draw_board
-    while true
+    while board.any_available_moves?(current_team)
      draw_board
      input = read_char
      handle_input(input)

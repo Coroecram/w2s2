@@ -12,7 +12,7 @@ class EmptySpace
   end
 
   def to_s
-    "+ "
+    "   "
   end
 
   def enemy?(other_piece)
@@ -50,7 +50,6 @@ class ChessPiece < EmptySpace
       self.first_move = nil if self.is_a?(Pawn)
       implement_move(end_pos)
       return true
-      end
     end
     false
   end
@@ -108,7 +107,7 @@ class Pawn < ChessPiece
   end
 
   def to_s
-    team == :white ? "\u2659" + " " : "\u265F" + " "
+    " " + (team == :white ? "\u2659" : "\u265F") + " "
   end
 
   def valid_moves
@@ -185,7 +184,7 @@ end
 class Rook < SlidingPiece
 
   def to_s
-    team == :white ? "\u2656" + " " : "\u265C" + " "
+    " " + (team == :white ? "\u2656" : "\u265C") + " "
   end
 
   def directions
@@ -199,7 +198,7 @@ end
 class Bishop < SlidingPiece
 
   def to_s
-    team == :white ? "\u2657" + " " : "\u265D" + " "
+    " " + (team == :white ? "\u2657" : "\u265D") + " "
   end
 
   def directions
@@ -211,7 +210,7 @@ end
 class Queen < SlidingPiece
 
   def to_s
-    team == :white ? "\u2655" + " " : "\u265B" + " "
+    " " + (team == :white ? "\u2655" : "\u265B") + " "
   end
 
   def directions
@@ -241,7 +240,7 @@ end
 class Knight < SteppingPiece
 
   def to_s
-    team == :white ? "\u2658" + " " : "\u265E" + " "
+    " " + (team == :white ? "\u2658" : "\u265E") + " "
   end
 
   def directions
@@ -261,7 +260,7 @@ end
 class King < SteppingPiece
 
   def to_s
-    team == :white ? "\u2654" + " " : "\u265A" + " "
+    " " + (team == :white ? "\u2654" : "\u265A") + " "
   end
 
   def directions
