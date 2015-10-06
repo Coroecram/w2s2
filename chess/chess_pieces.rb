@@ -40,19 +40,10 @@ class ChessPiece < EmptySpace
   def make_move(end_pos)
     if valid_move?(end_pos)
       self.first_move = nil if self.is_a?(Pawn)
-
-      if enemy?(board[end_pos])
-        start_object = self.board[position]
-        self.board[position] = EmptySpace.new(board, end_pos)
-        self.board[end_pos] = start_object
-        return true
-      else
-        start_object = self.board[position]
-        end_object = self.board[end_pos]
-        self.board[position] = end_object
-        self.board[end_pos] = start_object
-        return true
-      end
+      board_clone = board.clone
+      board_clone.move(position, end_pos) # Check logic for first moves and in_check?
+      board_clone.flip
+      return implement_move(end_pos) unless board_clone.in_check?(team)
     end
     false
   end
@@ -69,12 +60,24 @@ class ChessPiece < EmptySpace
     team == other_piece.team
   end
 
+  def implement_move(end_pos)
+    if enemy?(board[end_pos])
+      start_object = self.board[position]
+      self.board[position] = EmptySpace.new(board, end_pos)
+      self.board[end_pos] = start_object
+    else
+      start_object = self.board[position]
+      end_object = self.board[end_pos]
+      self.board[position] = end_object
+      self.board[end_pos] = start_object
+    end
+    true
+  end
+
 end
 
 class Pawn < ChessPiece
   attr_accessor :first_move
-  OFFENSIVE_MOVES = [[-1, 1],
-                      [-1, -1]]
 
   def initialize(board, position, team)
     super
@@ -91,9 +94,12 @@ class Pawn < ChessPiece
     directions << [-1, 0] if board[[x - 1, y]].team.nil?
     directions << [-2, 0] if first_move
     possible_moves = []
-    OFFENSIVE_MOVES.each do |move|
+    [[-1, 1], [-1, -1]].each do |move|
       dx, dy = move
-      directions << move if enemy?(board[[x + dx, y + dy]])
+      puts board[[x + dx, y + dy]]
+      if board.in_bounds?(move)
+        directions << move if enemy?(board[[x + dx, y + dy]])
+      end
     end
     directions.each do |dir|
       x, y = position
@@ -160,21 +166,24 @@ end
 
 class Bishop < SlidingPiece
 
-  DIRECTIONS = SlidingPiece.diagonal_directions
-
   def to_s
     team == :white ? "\u2657" + " " : "\u265D" + " "
+  end
+
+  def directions
+    SlidingPiece.diagonal_directions
   end
 
 end
 
 class Queen < SlidingPiece
 
-  DIRECTIONS = SlidingPiece.horizontal_directions +
-               SlidingPiece.diagonal_directions
-
   def to_s
     team == :white ? "\u2655" + " " : "\u265B" + " "
+  end
+
+  def directions
+    SlidingPiece.horizontal_directions + SlidingPiece.diagonal_directions
   end
 
 end
@@ -183,7 +192,7 @@ class SteppingPiece < SlidingPiece
 
   def valid_moves
     possible_moves = []
-    DIRECTIONS.each do |dir|
+    directions.each do |dir|
       x, y = position
       dx, dy = dir
       possible_moves << [x + dx, y + dy]
@@ -191,51 +200,47 @@ class SteppingPiece < SlidingPiece
     possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
   end
 
+  def directions
+    []
+  end
+
 end
 
 class Knight < SteppingPiece
-
-  DIRECTIONS = [[2, 1],
-                [1, 2],
-                [2, 1],
-                [-2, -1],
-                [-1, -2],
-                [-1, 2],
-                [-2, 1],
-                [1, -2],
-                [1, -2]
-                ]
 
   def to_s
     team == :white ? "\u2658" + " " : "\u265E" + " "
   end
 
-  # def valid_moves
-  #   possible_moves = []
-  #   DIRECTIONS.each do |dir|
-  #     x, y = position
-  #     dx, dy = dir
-  #     possible_moves << [x + dx, y + dy]
-  #   end
-  #   possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
-  # end
+  def directions
+    [[2, 1],
+     [1, 2],
+     [2, 1],
+     [-2, -1],
+     [-1, -2],
+     [-1, 2],
+     [-2, 1],
+     [1, -2],
+     [1, -2]]
+  end
 
 end
 
 class King < SteppingPiece
 
-DIRECTIONS = [[1, 0],
-              [0, 1],
-              [1, 1],
-              [0, -1],
-              [-1, 0],
-              [-1,-1],
-              [1, -1],
-              [-1, 1]
-              ]
-
   def to_s
     team == :white ? "\u2654" + " " : "\u265A" + " "
+  end
+
+  def directions
+    [[1, 0],
+    [0, 1],
+    [1, 1],
+    [0, -1],
+    [-1, 0],
+    [-1,-1],
+    [1, -1],
+    [-1, 1]]
   end
 
 end
