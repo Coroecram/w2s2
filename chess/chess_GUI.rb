@@ -75,7 +75,7 @@ class Display
       STDIN.echo = true
       STDIN.cooked!
 
-      return input
+    return input
   end
 
   def handle_input(input)
@@ -85,6 +85,7 @@ class Display
     when "\r"
       if selected_position
         swap_players if board.make_move(selected_position, cursor_position)
+
         self.selected_position = nil
       else
         if board[cursor_position].team == current_team

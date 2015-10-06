@@ -100,15 +100,32 @@ class Pawn < ChessPiece
 
 end
 
-class Rook < ChessPiece
+class SlidingPiece < ChessPiece
+  def valid_moves
+    queue = []
+    directions.each do |dir|
+    end
+    possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
+  end
+
+end
+
+class Rook < SlidingPiece
+
+  DIRECTIONS = [[0, 1],
+                [0, -1],
+                [1, 0],
+                [-1, 0]]
 
   def to_s
     team == :white ? "\u2656" + " " : "\u265C" + " "
   end
 
+
+
 end
 
-class Bishop < ChessPiece
+class Bishop < SlidingPiece
 
   def to_s
     team == :white ? "\u2657" + " " : "\u265D" + " "
@@ -116,7 +133,7 @@ class Bishop < ChessPiece
 
 end
 
-class Queen < ChessPiece
+class Queen < SlidingPiece
 
   def to_s
     team == :white ? "\u2655" + " " : "\u265B" + " "
@@ -124,7 +141,21 @@ class Queen < ChessPiece
 
 end
 
-class Knight < ChessPiece
+class SteppingPiece < SlidingPiece
+
+  def valid_moves
+    possible_moves = []
+    DIRECTIONS.each do |dir|
+      x, y = position
+      dx, dy = dir
+      possible_moves << [x + dx, y + dy]
+    end
+    possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
+  end
+
+end
+
+class Knight < SteppingPiece
 
   DIRECTIONS = [[2, 1],
                 [1, 2],
@@ -153,7 +184,7 @@ class Knight < ChessPiece
 
 end
 
-class King < ChessPiece
+class King < SteppingPiece
 
 DIRECTIONS = [[1, 0],
               [0, 1],
@@ -167,16 +198,6 @@ DIRECTIONS = [[1, 0],
 
   def to_s
     team == :white ? "\u2654" + " " : "\u265A" + " "
-  end
-
-  def valid_moves
-    possible_moves = []
-    DIRECTIONS.each do |dir|
-      x, y = position
-      dx, dy = dir
-      possible_moves << [x + dx, y + dy]
-    end
-    possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
   end
 
 end
