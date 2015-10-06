@@ -39,7 +39,7 @@ class Board
     copy = Board.new
     grid.each_with_index do |row, x|
       row.each_with_index do |tile, y|
-        copy[[x, y]] = tile.dup
+        copy[[x, y]] = tile.dup(copy)
       end
     end
 
@@ -72,11 +72,11 @@ class Board
     piece.implement_move(end_pos)
   end
 
-  def draw_row
-    @grid.each do |row|
-      p row
-    end
-  end
+  # def draw_row
+  #   @grid.each do |row|
+  #     p row
+  #   end
+  # end
 
   def in_bounds?(pos)
     x, y = pos
@@ -96,6 +96,11 @@ class Board
     pieces
   end
 
+  def any_available_moves?(team)
+    pieces = team_pieces(team)
+    pieces.any? { |piece| piece.has_valid_moves? }
+  end
+
   def opposing_pieces(team)
     team == :white ? team = :black : team = :white
 
@@ -108,15 +113,17 @@ class Board
     pieces.each do |piece|
       all_moves += piece.valid_moves
     end
-
     all_moves
   end
 
   def in_check?(team)
-    opposing_moves(team).include?(king_position(team))
+    king_pos = king_position(team)
+    possible_moves = opposing_moves(team)
+    opposing_moves(team).include?(king_pos)
   end
 
   def king_position(team)
+    # byebug
     grid.each do |row|
       row.each do |tile|
         return tile.position if tile.team == team && tile.is_a?(King)

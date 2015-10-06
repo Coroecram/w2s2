@@ -27,6 +27,10 @@ class EmptySpace
     team == nil
   end
 
+  def dup(board)
+    self.class.new(board, position)
+  end
+
 end
 
 class ChessPiece < EmptySpace
@@ -39,17 +43,33 @@ class ChessPiece < EmptySpace
 
   def make_move(end_pos)
     if valid_move?(end_pos)
+      # board_clone = board.clone
+      # board_clone.move(position, end_pos)
+      # board_clone.flip
+      # unless board_clone.in_check?(team)
       self.first_move = nil if self.is_a?(Pawn)
-      board_clone = board.clone
-      board_clone.move(position, end_pos) # Check logic for first moves and in_check?
-      board_clone.flip
-      return implement_move(end_pos) unless board_clone.in_check?(team)
+      implement_move(end_pos)
+      return true
+      end
     end
     false
   end
 
+  # def valid_move?(end_pos)
+  #   valid_moves.include?(end_pos)
+  # end
+
+  def has_valid_moves?
+    valid_moves.any? { |move| valid_move?(move) }
+  end
+
   def valid_move?(end_pos)
-    valid_moves.include?(end_pos)
+    return false unless valid_moves.include?(end_pos)
+    board_clone = board.clone
+    board_clone.move(position, end_pos)
+    board_clone.flip
+    return false if board_clone.in_check?(team)
+    true
   end
 
   def enemy?(other_piece)
@@ -71,7 +91,10 @@ class ChessPiece < EmptySpace
       self.board[position] = end_object
       self.board[end_pos] = start_object
     end
-    true
+  end
+
+  def dup(new_board)
+     self.class.new(new_board, position, team)
   end
 
 end
@@ -96,9 +119,11 @@ class Pawn < ChessPiece
     possible_moves = []
     [[-1, 1], [-1, -1]].each do |move|
       dx, dy = move
-      puts board[[x + dx, y + dy]]
-      if board.in_bounds?(move)
-        directions << move if enemy?(board[[x + dx, y + dy]])
+      pos = [x + dx, y + dy]
+      if board.in_bounds?(pos)
+        if enemy?(board[pos])
+          possible_moves << pos
+        end
       end
     end
     directions.each do |dir|
@@ -108,6 +133,13 @@ class Pawn < ChessPiece
     end
     possible_moves.select { |pos| board.in_bounds?(pos) && !friendly?(board[pos]) }
   end
+
+  def dup(new_board)
+    new_piece = self.class.new(new_board, position, team)
+    new_piece.first_move = first_move
+    new_piece
+  end
+
 
 end
 
